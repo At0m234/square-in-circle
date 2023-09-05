@@ -14,18 +14,22 @@
       <label class="label" for="yInput">Y координата квадрата:</label>
       <input class="input" type="number" id="yInput" v-model="squareY" @input="drawCircleSquare" />
     </div>
-    <canvas class="canvas" ref="canvas"></canvas>
+    <canvas class="canvas" ref="canvas" @mousemove="handleMouseMove" @mousedown="handleMouseDown"
+      @mouseup="handleMouseUp">
+    </canvas>
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from 'vue';
+<script setup>
+import { ref, onMounted, reactive } from 'vue';
 
-const radius = ref(50);
-const squareSize = ref(20);
-const squareX = ref(100);
-const squareY = ref(100);
+const radius = ref(500);
+const squareSize = ref(200);
+const squareX = ref(15);
+const squareY = ref(15);
 const canvas = ref(null);
+const isDragging = ref(false);
+const offset = reactive({ x: 0, y: 0 });
 
 function drawCircleSquare() {
   const context = canvas.value.getContext("2d");
@@ -39,7 +43,40 @@ function drawCircleSquare() {
   context.fillRect(squareXPos, squareYPos, squareSize.value, squareSize.value);
 }
 
+function handleMouseDown(event) {
+  const rect = canvas.value.getBoundingClientRect();
+  const mouseX = event.clientX - rect.left;
+  const mouseY = event.clientY - rect.top;
+
+  isDragging.value = true;
+  offset.x = mouseX - squareX.value;
+  offset.y = mouseY - squareY.value;
+}
+
+function handleMouseMove(event) {
+  if (isDragging.value) {
+    const rect = canvas.value.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+
+    squareX.value = mouseX - offset.x;
+    squareY.value = mouseY - offset.y;
+
+    drawCircleSquare();
+  }
+}
+
+function handleMouseUp() {
+  isDragging.value = false;
+}
+
+onMounted(() => {
+  canvas.value.width = canvas.value.offsetWidth;
+  canvas.value.height = canvas.value.offsetHeight;
+  drawCircleSquare();
+});
 </script>
+
 
 <style scoped>
 .controls {
