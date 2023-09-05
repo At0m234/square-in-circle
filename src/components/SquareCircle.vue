@@ -43,28 +43,18 @@ function drawCircleSquare() {
   const context = canvas.value.getContext("2d");
   context.clearRect(0, 0, canvas.value.width, canvas.value.height);
 
-  const canvasWidth = canvas.value.width;
-  const canvasHeight = canvas.value.height;
-
-  const maxRadius = Math.min(canvasWidth, canvasHeight) / 2;
-  const clampedRadius = Math.min(maxRadius, radius.value);
-
   context.beginPath();
-  context.arc(canvasWidth / 2, canvasHeight / 2, clampedRadius, 0, 2 * Math.PI);
-  context.fillStyle = 'blue'; 
+  context.arc(canvas.value.width / 2, canvas.value.height / 2, radius.value, 0, 2 * Math.PI);
+  context.fillStyle = 'blue';
   context.fill();
 
   const halfSquareSize = squareSize.value / 2;
-  const maxSquareSize = Math.min(canvasWidth, canvasHeight);
-  const clampedSquareSize = Math.min(maxSquareSize, squareSize.value);
+  const squareXPos = canvas.value.width / 2 + squareX.value - halfSquareSize;
+  const squareYPos = canvas.value.height / 2 + squareY.value - halfSquareSize;
 
-  const squareXPos = canvasWidth / 2 + squareX.value - halfSquareSize;
-  const squareYPos = canvasHeight / 2 + squareY.value - halfSquareSize;
-
-  context.fillStyle = 'red';
-  context.fillRect(squareXPos, squareYPos, clampedSquareSize, clampedSquareSize);
+  context.fillStyle = 'red'; 
+  context.fillRect(squareXPos, squareYPos, squareSize.value, squareSize.value);
 }
-
 
 
 function handleMouseDown(event) {
@@ -95,7 +85,6 @@ function handleMouseMove(event) {
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
 
-    // Объявляем переменную halfSquareSize
     const halfSquareSize = squareSize.value / 2;
 
     // Вычисляем расстояние от каждой стороны квадрата до центра окружности
