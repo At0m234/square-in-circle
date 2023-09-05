@@ -1,6 +1,5 @@
 <template>
   <div>
-    <h1>Квадрат в окружности</h1>
     <div class="controls">
       <div class="control">
         <label class="label" for="radiusInput">Радиус окружности:</label>
@@ -22,25 +21,33 @@
         <input class="input" type="number" id="yInput" v-model="squareY" @input="drawCircleSquare" />
       </div>
     </div>
+
     <canvas class="canvas" ref="canvas" @mousemove="handleMouseMove" @mousedown="handleMouseDown"
       @mouseup="handleMouseUp">
     </canvas>
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, reactive } from 'vue';
+<script setup lang="ts">
+import { ref, onMounted, reactive, Ref } from 'vue';
 
-const radius = ref(50);
-const squareSize = ref(20);
-const squareX = ref(15);
-const squareY = ref(15);
-const canvas = ref(null);
-const isDragging = ref(false);
-const offset = reactive({ x: 0, y: 0 });
+interface Coordinates {
+  x: number;
+  y: number;
+}
+
+const radius: Ref<number> = ref(400);
+const squareSize: Ref<number> = ref(80);
+const squareX: Ref<number> = ref(15);
+const squareY: Ref<number> = ref(15);
+const canvas: Ref<null | HTMLCanvasElement> = ref(null);
+const isDragging: Ref<boolean> = ref(false);
+const offset: Coordinates = reactive({ x: 0, y: 0 });
 
 function drawCircleSquare() {
-  const context = canvas.value.getContext("2d");
+  const context = canvas.value?.getContext("2d");
+  if (!context) return;
+
   context.clearRect(0, 0, canvas.value.width, canvas.value.height);
 
   context.beginPath();
@@ -52,13 +59,14 @@ function drawCircleSquare() {
   const squareXPos = canvas.value.width / 2 + squareX.value - halfSquareSize;
   const squareYPos = canvas.value.height / 2 + squareY.value - halfSquareSize;
 
-  context.fillStyle = 'red'; 
+  context.fillStyle = 'red';
   context.fillRect(squareXPos, squareYPos, squareSize.value, squareSize.value);
 }
 
+function handleMouseDown(event: MouseEvent) {
+  const rect = canvas.value?.getBoundingClientRect();
+  if (!rect) return;
 
-function handleMouseDown(event) {
-  const rect = canvas.value.getBoundingClientRect();
   const mouseX = event.clientX - rect.left;
   const mouseY = event.clientY - rect.top;
 
@@ -79,36 +87,33 @@ function handleMouseDown(event) {
   }
 }
 
-function handleMouseMove(event) {
+function handleMouseMove(event: MouseEvent) {
   if (isDragging.value) {
-    const rect = canvas.value.getBoundingClientRect();
+    const rect = canvas.value?.getBoundingClientRect();
+    if (!rect) return;
+
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
 
+    // Ограничиваем перемещение квадрата внутри окружности
+    const centerX = canvas.value.width / 2;
+    const centerY = canvas.value.height / 2;
+    const distanceToCenter = Math.sqrt(Math.pow(mouseX - centerX, 2) + Math.pow(mouseY - centerY, 2));
+
+    // Рассчитываем расстояния от углов квадрата до центра окружности
     const halfSquareSize = squareSize.value / 2;
+    const topLeftDistance = Math.sqrt(Math.pow(mouseX - (centerX - halfSquareSize), 2) + Math.pow(mouseY - (centerY - halfSquareSize), 2));
+    const topRightDistance = Math.sqrt(Math.pow(mouseX - (centerX + halfSquareSize), 2) + Math.pow(mouseY - (centerY - halfSquareSize), 2));
+    const bottomLeftDistance = Math.sqrt(Math.pow(mouseX - (centerX - halfSquareSize), 2) + Math.pow(mouseY - (centerY + halfSquareSize), 2));
+    const bottomRightDistance = Math.sqrt(Math.pow(mouseX - (centerX + halfSquareSize), 2) + Math.pow(mouseY - (centerY + halfSquareSize), 2));
 
-    // Вычисляем расстояние от каждой стороны квадрата до центра окружности
-    const squareLeft = canvas.value.width / 2 + squareX.value - halfSquareSize;
-    const squareRight = squareLeft + squareSize.value;
-    const squareTop = canvas.value.height / 2 + squareY.value - halfSquareSize;
-    const squareBottom = squareTop + squareSize.value;
-
-    // Вычисляем центр окружности
-    const circleCenterX = canvas.value.width / 2;
-    const circleCenterY = canvas.value.height / 2;
-
-    // Вычисляем расстояние от каждой стороны квадрата до центра окружности
-    const distanceLeft = Math.abs(circleCenterX - squareLeft);
-    const distanceRight = Math.abs(circleCenterX - squareRight);
-    const distanceTop = Math.abs(circleCenterY - squareTop);
-    const distanceBottom = Math.abs(circleCenterY - squareBottom);
-
-    // Разрешаем перемещение, если хотя бы одна сторона квадрата находится внутри окружности
+    // Проверяем, что центр квадрата все углы находятся внутри окружности
     if (
-      distanceLeft <= radius.value &&
-      distanceRight <= radius.value &&
-      distanceTop <= radius.value &&
-      distanceBottom <= radius.value
+      distanceToCenter <= radius.value - halfSquareSize &&
+      topLeftDistance <= radius.value &&
+      topRightDistance <= radius.value &&
+      bottomLeftDistance <= radius.value &&
+      bottomRightDistance <= radius.value
     ) {
       squareX.value = mouseX - offset.x;
       squareY.value = mouseY - offset.y;
@@ -123,13 +128,13 @@ function handleMouseUp() {
 }
 
 onMounted(() => {
-  // Устанавливаем размеры холста и вызываем функцию для отображения круга с квадратом
-  canvas.value.width = canvas.value.offsetWidth;
-  canvas.value.height = canvas.value.offsetHeight;
-  drawCircleSquare();
+  if (canvas.value) {
+    canvas.value.width = canvas.value.offsetWidth;
+    canvas.value.height = canvas.value.offsetHeight;
+    drawCircleSquare();
+  }
 });
 </script>
-
 
 <style scoped>
 .controls {
