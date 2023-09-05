@@ -1,14 +1,17 @@
 {
   "name": "square-in-circle",
   "private": true,
-  "version": "0.0.0",
+  "homepage": "https://github.com/At0m234/square-in-circle",
+  "version": "1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build",
+    "deploy": "gh-pages -d dist",
     "preview": "vite preview"
   },
   "dependencies": {
+    "gh-pages": "^6.0.0",
     "node-sass": "^9.0.0",
     "sass-loader": "^13.3.2",
     "vue": "^3.3.4",
