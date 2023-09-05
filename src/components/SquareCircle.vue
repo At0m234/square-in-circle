@@ -44,9 +44,9 @@ const canvas: Ref<null | HTMLCanvasElement> = ref(null);
 const isDragging: Ref<boolean> = ref(false);
 const offset: Coordinates = reactive({ x: 0, y: 0 });
 
-function drawCircleSquare() {
+function drawCircleSquare(): void {
   const context = canvas.value?.getContext("2d");
-  if (!context) return;
+  if (!context || !canvas.value) return;
 
   context.clearRect(0, 0, canvas.value.width, canvas.value.height);
 
@@ -63,7 +63,8 @@ function drawCircleSquare() {
   context.fillRect(squareXPos, squareYPos, squareSize.value, squareSize.value);
 }
 
-function handleMouseDown(event: MouseEvent) {
+function handleMouseDown(event: MouseEvent): void {
+  if (!canvas.value) return;
   const rect = canvas.value?.getBoundingClientRect();
   if (!rect) return;
 
@@ -87,7 +88,8 @@ function handleMouseDown(event: MouseEvent) {
   }
 }
 
-function handleMouseMove(event: MouseEvent) {
+function handleMouseMove(event: MouseEvent): void {
+  if (!canvas.value) return;
   if (isDragging.value) {
     const rect = canvas.value?.getBoundingClientRect();
     if (!rect) return;
@@ -123,7 +125,7 @@ function handleMouseMove(event: MouseEvent) {
   }
 }
 
-function handleMouseUp() {
+function handleMouseUp(): void {
   isDragging.value = false;
 }
 
