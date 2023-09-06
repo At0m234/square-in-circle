@@ -1,7 +1,8 @@
 # Launch project
 1. `git clone https://github.com/At0m234/square-in-circle`
 2. `yarn install` || `npm install`
-2. `open http://localhost:5173/`
+3. `yarn dev` || `npm run dev`
+4. `open http://localhost:5173/`
 # Task
 Develop Vue3.js module.
 1. Draw a circle on the canvas that contains a square inside.
